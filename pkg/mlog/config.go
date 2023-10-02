@@ -1,4 +1,4 @@
-package log
+package mlog
 
 type Config struct {
 	Code              string     `yaml:"code"`

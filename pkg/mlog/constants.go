@@ -1,4 +1,4 @@
-package log
+package mlog
 
 type loggerLevels struct {
 	PANIC string
