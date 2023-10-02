@@ -1,31 +1,48 @@
-package Api
+package api
 
 import (
-	"github.com/b0rn/mkit/internal/factorywcmanager"
-	"github.com/b0rn/mkit/pkg/container"
+	"context"
+	"errors"
+
+	"github.com/b0rn/mkit/pkg/factorymanager"
 )
 
 type Api interface {
-	Serve() error
+	Serve(ctx context.Context) error
+	GracefulShutdown(ctx context.Context) error
 }
-type ApiFactory factorywcmanager.Factory[Api]
+type ApiFactory factorymanager.Factory[Api]
 type ApiManager struct {
-	*factorywcmanager.FactoryManager[Api]
+	*factorymanager.FactoryManager[Api]
 }
 
-func NewManager(c container.Container) *ApiManager {
-	m := factorywcmanager.NewManager[Api](c)
+func NewManager() *ApiManager {
+	m := factorymanager.NewFactoryManager[Api]()
 	return &ApiManager{m}
 }
 
-func (api *ApiManager) ServeAll() error {
+func (api *ApiManager) ServeAll(ctx context.Context) error {
 	for _, v := range api.GetFactoryKeys() {
-		a, ok := api.Get(v)
+		a, ok := api.GetObject(v)
 		if ok {
-			if err := a.Serve(); err != nil {
+			if err := a.Serve(ctx); err != nil {
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+func (api *ApiManager) GracefulShutdown(ctx context.Context) error {
+	var err error
+	for _, v := range api.GetFactoryKeys() {
+		a, ok := api.GetObject(v)
+		if ok {
+			e := a.GracefulShutdown(ctx)
+			if e != nil {
+				err = errors.Join(err, e)
+			}
+		}
+	}
+	return err
 }

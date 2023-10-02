@@ -1,15 +1,16 @@
 package usecase
 
 import (
-	"github.com/b0rn/mkit/internal/factorywcmanager"
-	"github.com/b0rn/mkit/pkg/container"
+	"github.com/b0rn/mkit/pkg/factorymanager"
 )
 
-type UseCase interface{}
-type UseCaseFactory factorywcmanager.Factory[UseCase]
-type UseCaseManager *factorywcmanager.FactoryManager[UseCase]
+type UseCase interface {
+	GracefulShutdown() error
+}
+type UseCaseFactory = factorymanager.Factory[UseCase]
+type UseCaseManager = *factorymanager.FactoryManager[UseCase]
 
-func NewManager(c container.Container) UseCaseManager {
-	m := factorywcmanager.NewManager[UseCase](c)
+func NewManager() UseCaseManager {
+	m := factorymanager.NewFactoryManager[UseCase]()
 	return m
 }

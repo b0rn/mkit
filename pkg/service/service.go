@@ -1,11 +1,15 @@
 package service
 
 import (
+	"context"
+	"errors"
+
+	"github.com/b0rn/mkit/pkg/api"
 	"github.com/b0rn/mkit/pkg/config"
 	"github.com/b0rn/mkit/pkg/container"
 	"github.com/b0rn/mkit/pkg/dataservice"
 	"github.com/b0rn/mkit/pkg/datastore"
-	"github.com/b0rn/mkit/pkg/log"
+	"github.com/b0rn/mkit/pkg/mlog"
 	"github.com/b0rn/mkit/pkg/usecase"
 	"github.com/rs/zerolog"
 )
@@ -16,15 +20,17 @@ type Service struct {
 	DataStoreManager   datastore.DataStoreManager
 	DataServiceManager dataservice.DataServiceManager
 	UsecaseManager     usecase.UseCaseManager
+	ApiManager         api.ApiManager
 }
 
 func NewService() *Service {
 	container := container.NewContainer()
 	return &Service{
 		Container:          container,
-		DataStoreManager:   datastore.NewManager(container),
-		DataServiceManager: dataservice.NewManager(container),
-		UsecaseManager:     usecase.NewManager(container),
+		DataStoreManager:   datastore.NewManager(),
+		DataServiceManager: dataservice.NewManager(),
+		UsecaseManager:     usecase.NewManager(),
+		ApiManager:         *api.NewManager(),
 	}
 }
 
@@ -38,6 +44,22 @@ func (s *Service) BuildConfig(filetype string, filepath string, cfg interface{})
 	return err
 }
 
-func (s *Service) EnableLogger(cfg log.Config, errorStackMarshaller log.ErrorStackMarshaler) zerolog.Logger {
-	return log.Init(cfg, errorStackMarshaller)
+func (s *Service) EnableLogger(cfg mlog.Config, errorStackMarshaller mlog.ErrorStackMarshaler) zerolog.Logger {
+	return mlog.Init(cfg, errorStackMarshaller)
+}
+
+func (s *Service) GracefulShutdown(ctx context.Context) error {
+	var err error
+	for _, v := range s.UsecaseManager.GetFactoryKeys() {
+		if u, ok := s.UsecaseManager.GetObject(v); ok {
+			e := u.GracefulShutdown()
+			if e != nil {
+				err = errors.Join(err, e)
+			}
+		}
+	}
+	if e := s.ApiManager.GracefulShutdown(ctx); e != nil {
+		err = errors.Join(err, e)
+	}
+	return err
 }

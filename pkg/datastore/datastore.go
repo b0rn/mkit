@@ -1,15 +1,12 @@
 package datastore
 
-import (
-	"github.com/b0rn/mkit/internal/factorywcmanager"
-	"github.com/b0rn/mkit/pkg/container"
-)
+import "github.com/b0rn/mkit/pkg/factorymanager"
 
 type DataStore interface{}
-type DataStoreFactory = factorywcmanager.Factory[DataStore]
-type DataStoreManager = *factorywcmanager.FactoryManager[DataStore]
+type DataStoreFactory = factorymanager.Factory[DataStore]
+type DataStoreManager = *factorymanager.FactoryManager[DataStore]
 
-func NewManager(c container.Container) DataStoreManager {
-	m := factorywcmanager.NewManager[DataStore](c)
+func NewManager() DataStoreManager {
+	m := factorymanager.NewFactoryManager[DataStore]()
 	return m
 }

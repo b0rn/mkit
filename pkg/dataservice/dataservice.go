@@ -1,15 +1,16 @@
 package dataservice
 
 import (
-	"github.com/b0rn/mkit/internal/factorywcmanager"
-	"github.com/b0rn/mkit/pkg/container"
+	"github.com/b0rn/mkit/pkg/factorymanager"
 )
 
-type DataService interface{}
-type DataServiceFactory = factorywcmanager.Factory[DataService]
-type DataServiceManager = *factorywcmanager.FactoryManager[DataService]
+type DataService interface {
+	GracefulShutdown() error
+}
+type DataServiceFactory = factorymanager.Factory[DataService]
+type DataServiceManager = *factorymanager.FactoryManager[DataService]
 
-func NewManager(c container.Container) DataServiceManager {
-	m := factorywcmanager.NewManager[DataService](c)
+func NewManager() DataServiceManager {
+	m := factorymanager.NewFactoryManager[DataService]()
 	return m
 }
