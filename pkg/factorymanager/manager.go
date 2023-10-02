@@ -1,6 +1,8 @@
 package factorymanager
 
-import "context"
+import (
+	"context"
+)
 
 type Factory[T interface{}] func(ctx context.Context, params interface{}) (T, error)
 
@@ -33,17 +35,32 @@ func (m *FactoryManager[T]) SetFactory(key string, factory Factory[T]) {
 	m.factories[key] = factory
 }
 
-func (m *FactoryManager[T]) Build(ctx context.Context, key string, params interface{}) (*T, error) {
+func (m *FactoryManager[T]) Build(ctx context.Context, key string, params interface{}) (T, error) {
+	obj, ok := m.concretes[key]
+	if ok {
+		return obj, nil
+	}
 	f, ok := m.GetFactory(key)
 	if !ok {
-		return nil, ErrFactoryNotFound
+		return obj, ErrFactoryNotFound
 	}
 	obj, err := f(ctx, params)
 	if err != nil {
-		return nil, err
+		return obj, err
 	}
 	m.concretes[key] = obj
-	return &obj, nil
+	return obj, nil
+}
+
+func (m *FactoryManager[T]) BuildAll(ctx context.Context, params interface{}) []error {
+	var errs []error
+	for k, _ := range m.factories {
+		_, err := m.Build(ctx, k, params)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
 }
 
 func (m *FactoryManager[T]) GetObject(key string) (T, bool) {
