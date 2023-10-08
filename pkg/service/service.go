@@ -34,26 +34,37 @@ func NewService() *Service {
 	}
 }
 
+// Calls [config.LoadEnvVars]
 func (s *Service) LoadEnvVars(filetype string, filepath string) error {
 	return config.LoadEnvVars(filetype, filepath)
 }
 
+// Calls [config.BuildConfig] and stores the configuration in Config field
 func (s *Service) BuildConfig(filetype string, filepath string, cfg interface{}) error {
 	err := config.BuildConfig(filetype, filepath, cfg)
 	s.Config = cfg
 	return err
 }
 
+// Calls [mlog.Init]
 func (s *Service) EnableLogger(cfg mlog.Config, errorStackMarshaller mlog.ErrorStackMarshaler) zerolog.Logger {
 	return mlog.Init(cfg, errorStackMarshaller)
 }
 
+// Sequentially calls GracefulShutdown on every use case, then on every data service, then on ApiManager.
 func (s *Service) GracefulShutdown(ctx context.Context) error {
 	var err error
 	for _, v := range s.UseCaseManager.GetFactoryKeys() {
 		if u, ok := s.UseCaseManager.GetObject(v); ok {
 			if e := u.GracefulShutdown(ctx); e != nil {
 				err = errors.Join(err, e)
+			}
+		}
+	}
+	for _, v := range s.DataServiceManager.GetFactoryKeys() {
+		if ds, ok := s.DataServiceManager.GetObject(v); ok {
+			if e := ds.GracefulShutdown(ctx); e != nil {
+				err = errors.Join(e)
 			}
 		}
 	}

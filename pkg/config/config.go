@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Loads environment variables into the current environment using viper.
 func LoadEnvVars(filetype string, filepath string) error {
 	viper.SetConfigFile(filepath)
 	viper.SetConfigType(filetype)
@@ -19,6 +20,8 @@ func LoadEnvVars(filetype string, filepath string) error {
 	return nil
 }
 
+// Loads a configuration using viper and unmarshals it into a variable.
+// Environment variables are expanded into each field.
 func BuildConfig(filetype string, filepath string, cfg interface{}) error {
 	viper.SetConfigFile(filepath)
 	viper.SetConfigType(filetype)

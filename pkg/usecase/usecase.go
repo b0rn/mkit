@@ -7,6 +7,7 @@ import (
 )
 
 type UseCase interface {
+	// To gracefully shutdown the use case
 	GracefulShutdown(ctx context.Context) error
 }
 type UseCaseFactory = factorymanager.Factory[UseCase]

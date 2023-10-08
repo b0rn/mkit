@@ -1,5 +1,6 @@
 package container
 
+// Container is a key-value store.
 type Container interface {
 	Get(key string) (interface{}, bool)
 	Set(key string, value interface{})

@@ -24,6 +24,8 @@ var Logger zerolog.Logger = log.Logger
 
 type ErrorStackMarshaler = func(err error) interface{}
 
+// Initializes the zerolog logger using the configuration.
+// The logger is globally set with Logger and with zerolog/log.Logger.
 func Init(cfg Config, errorStackMarsheler ErrorStackMarshaler) zerolog.Logger {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	if errorStackMarsheler != nil {
@@ -72,6 +74,7 @@ func Init(cfg Config, errorStackMarsheler ErrorStackMarshaler) zerolog.Logger {
 	return logger
 }
 
+// Logs an array of errors on the same message
 func LogErrors(event *zerolog.Event, errs []error) {
 	added := false
 	for _, e := range errs {

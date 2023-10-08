@@ -7,6 +7,7 @@ import (
 )
 
 type DataService interface {
+	// To gracefully shutdown the data service
 	GracefulShutdown(ctx context.Context) error
 }
 type DataServiceFactory = factorymanager.Factory[DataService]
