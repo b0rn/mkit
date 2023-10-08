@@ -1,0 +1,46 @@
+name: Module pipeline
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+    types: [opened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+      - name: Tests
+        run: |
+          go install github.com/jstemmer/go-junit-report@latest
+          go test -v -race -coverprofile=coverage.txt -coverpkg=./... ./... -covermode=atomic | go-junit-report -set-exit-code > testreport.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Publish test report
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: testreport.xml
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+            command: monitor
+      - name: Upload Snyk SARIF
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: snyk.sarif
+      
