@@ -18,3 +18,18 @@ func TestAddParentError(t *testing.T) {
 		t.Error("expected result to be non-nil")
 	}
 }
+
+func TestAddParentErrorToErrors(t *testing.T) {
+	errs := []error{errors.New("foo")}
+	if l := len(AddParentErrorToErrors(errs, nil)); l != 1 {
+		t.Errorf("expected to have an array of length 1 but got %v elements", l)
+	}
+	errs = append(errs, nil)
+	if l := len(AddParentErrorToErrors(errs, nil)); l != 1 {
+		t.Errorf("expected to have an array of length 1 but got %v elements", l)
+	}
+	errs = append(errs, errors.New("bar"))
+	if l := len(AddParentErrorToErrors(errs, nil)); l != 2 {
+		t.Errorf("expected to have an array of length 2 but got %v elements", l)
+	}
+}

@@ -54,7 +54,7 @@ func (m *FactoryManager[T]) Build(ctx context.Context, key string, params interf
 
 func (m *FactoryManager[T]) BuildAll(ctx context.Context, params interface{}) []error {
 	var errs []error
-	for k, _ := range m.factories {
+	for k := range m.factories {
 		_, err := m.Build(ctx, k, params)
 		if err != nil {
 			errs = append(errs, err)

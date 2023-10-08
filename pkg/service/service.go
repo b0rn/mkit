@@ -19,7 +19,7 @@ type Service struct {
 	Container          container.Container
 	DataStoreManager   datastore.DataStoreManager
 	DataServiceManager dataservice.DataServiceManager
-	UsecaseManager     usecase.UseCaseManager
+	UseCaseManager     usecase.UseCaseManager
 	ApiManager         api.ApiManager
 }
 
@@ -29,7 +29,7 @@ func NewService() *Service {
 		Container:          container,
 		DataStoreManager:   datastore.NewManager(),
 		DataServiceManager: dataservice.NewManager(),
-		UsecaseManager:     usecase.NewManager(),
+		UseCaseManager:     usecase.NewManager(),
 		ApiManager:         *api.NewManager(),
 	}
 }
@@ -50,10 +50,9 @@ func (s *Service) EnableLogger(cfg mlog.Config, errorStackMarshaller mlog.ErrorS
 
 func (s *Service) GracefulShutdown(ctx context.Context) error {
 	var err error
-	for _, v := range s.UsecaseManager.GetFactoryKeys() {
-		if u, ok := s.UsecaseManager.GetObject(v); ok {
-			e := u.GracefulShutdown()
-			if e != nil {
+	for _, v := range s.UseCaseManager.GetFactoryKeys() {
+		if u, ok := s.UseCaseManager.GetObject(v); ok {
+			if e := u.GracefulShutdown(ctx); e != nil {
 				err = errors.Join(err, e)
 			}
 		}
