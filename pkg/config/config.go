@@ -30,7 +30,9 @@ func BuildConfig(filetype string, filepath string, cfg interface{}) error {
 	}
 	for _, k := range viper.AllKeys() {
 		v := viper.GetString(k)
-		viper.Set(k, os.ExpandEnv(v))
+		if v != "" {
+			viper.Set(k, os.ExpandEnv(v))
+		}
 	}
 	if err := viper.Unmarshal(cfg); err != nil {
 		return err
