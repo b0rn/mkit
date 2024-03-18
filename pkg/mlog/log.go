@@ -26,14 +26,14 @@ type ErrorStackMarshaler = func(err error) interface{}
 
 // Initializes the zerolog logger using the configuration.
 // The logger is globally set with Logger and with zerolog/log.Logger.
-func Init(cfg Config, errorStackMarsheler ErrorStackMarshaler) zerolog.Logger {
+func Init(cfg Config, errorStackMarsheler ErrorStackMarshaler, additionnalWriters ...io.Writer) zerolog.Logger {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	if errorStackMarsheler != nil {
 		zerolog.ErrorStackMarshaler = errorStackMarsheler
 	}
 	zerolog.SetGlobalLevel(levelMap[cfg.Level])
 	var logger zerolog.Logger
-	var writers []io.Writer
+	var writers = additionnalWriters
 
 	if cfg.EnablePrettyPrint {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stdout})
