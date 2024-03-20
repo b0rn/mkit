@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/b0rn/mkit/pkg/api"
 	"github.com/b0rn/mkit/pkg/config"
@@ -47,8 +48,8 @@ func (s *Service) BuildConfig(filetype string, filepath string, cfg interface{})
 }
 
 // Calls [mlog.Init]
-func (s *Service) EnableLogger(cfg mlog.Config, errorStackMarshaller mlog.ErrorStackMarshaler) zerolog.Logger {
-	return mlog.Init(cfg, errorStackMarshaller)
+func (s *Service) EnableLogger(cfg mlog.Config, errorStackMarshaller mlog.ErrorStackMarshaler, additionnalWriters ...io.Writer) zerolog.Logger {
+	return mlog.Init(cfg, errorStackMarshaller, additionnalWriters...)
 }
 
 // Sequentially calls GracefulShutdown on every use case, then on every data service, then on ApiManager.
