@@ -56,6 +56,22 @@ func (m *FactoryManager[T]) Build(ctx context.Context, key string, params interf
 	return obj, nil
 }
 
+// Build will call the factory and return the resulting object. Even if the object has already been built,
+// the function will call the factory.
+func (m *FactoryManager[T]) BuildWithNoCache(ctx context.Context, key string, params interface{}, useCache bool) (T, error) {
+	obj := m.concretes[key]
+	f, ok := m.GetFactory(key)
+	if !ok {
+		return obj, ErrFactoryNotFound
+	}
+	obj, err := f(ctx, params)
+	if err != nil {
+		return obj, err
+	}
+	m.concretes[key] = obj
+	return obj, nil
+}
+
 // BuildAll sequentially calls Build on every factory and then returns a list of errors.
 func (m *FactoryManager[T]) BuildAll(ctx context.Context, params interface{}) []error {
 	var errs []error
