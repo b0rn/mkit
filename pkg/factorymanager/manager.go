@@ -58,7 +58,7 @@ func (m *FactoryManager[T]) Build(ctx context.Context, key string, params interf
 
 // Build will call the factory and return the resulting object. Even if the object has already been built,
 // the function will call the factory.
-func (m *FactoryManager[T]) BuildWithNoCache(ctx context.Context, key string, params interface{}, useCache bool) (T, error) {
+func (m *FactoryManager[T]) BuildWithNoCache(ctx context.Context, key string, params interface{}) (T, error) {
 	obj := m.concretes[key]
 	f, ok := m.GetFactory(key)
 	if !ok {
